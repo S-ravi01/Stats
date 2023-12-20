@@ -1,0 +1,44 @@
+﻿import numpy as np
+
+# Given data
+classes = ['0-20', '20-40', '40-60', '60-80', '80-100']
+frequencies = np.array([13, 19, 25, 27, 16])
+
+# Midpoints of the classes
+midpoints = np.array([10, 30, 50, 70, 90])
+
+# Calculate the mean
+mean = np.sum(midpoints * frequencies) / np.sum(frequencies)
+
+# Calculate the standard deviation
+variance = np.sum(((midpoints - mean) ** 2) * frequencies) / np.sum(frequencies)
+std_dev = np.sqrt(variance)
+
+# Calculate the median
+cumulative_freq = np.cumsum(frequencies)
+median_class_index = np.argmax(cumulative_freq >= np.sum(frequencies) / 2)
+median_class = classes[median_class_index]
+lower_boundary = int(median_class.split('-')[0])
+cf_before_median = cumulative_freq[median_class_index - 1] if median_class_index > 0 else 0
+median = lower_boundary + ((np.sum(frequencies) / 2 - cf_before_median) / frequencies[median_class_index]) * (int(median_class.split('-')[1]) - lower_boundary)
+
+# Karl Pearson's Coefficient of Skewness
+pearson_skewness = 3 * (mean - median) / std_dev
+
+# Bowley's Coefficient of Skewness
+q1_index = np.argmax(cumulative_freq >= np.sum(frequencies) / 4)
+q3_index = np.argmax(cumulative_freq >= 3 * np.sum(frequencies) / 4)
+q1 = lower_boundary + ((np.sum(frequencies) / 4 - cumulative_freq[q1_index - 1]) / frequencies[q1_index]) * (int(classes[q1_index].split('-')[1]) - lower_boundary)
+q3 = lower_boundary + ((3 * np.sum(frequencies) / 4 - cumulative_freq[q3_index - 1]) / frequencies[q3_index]) * (int(classes[q3_index].split('-')[1]) - lower_boundary)
+bowley_skewness = (q3 + q1 - 2 * median) / (q3 - q1)
+
+# Pearsonian Coefficient of Skewness
+pearsonian_skewness = 1.5 * (mean - median) / (q3 - q1)
+
+# Print the results
+print(f"Mean: {mean}")
+print(f"Standard Deviation: {std_dev}")
+print(f"Median: {median}")
+print(f"Karl Pearson's Coefficient of Skewness: {pearson_skewness}")
+print(f"Bowley's Coefficient of Skewness: {bowley_skewness}")
+print(f"Pearsonian Coefficient of Skewness: {pearsonian_skewness}")
